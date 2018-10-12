@@ -1,39 +1,84 @@
- PVector ball[] = new PVector[10];
  
- PVector initVel[] = new PVector[10];
+ 
+ 
 
- PVector finalVel[] = new PVector[10];
+
  
 
  float distance =0;
  float time =0;
- float mass[] = new float[10];
+ 
  float xMultiplier;
  float yMultiplier;
- boolean notCollide = false;
+ PVector temp1 = new PVector();
+ PVector temp2 = new PVector();
 
 
 void setup()
 {
-  size (1800,1800);
-   for(int i = 0; i < 2 ; i++)
- {
-   xMultiplier = i * 150;
-   yMultiplier = 200 * i;
-   ball[i] = new PVector(200 + xMultiplier, 500 + yMultiplier);
-   mass[i] = 1;
-   if(i % 2 == 0)
-   {
-   initVel[i] = new PVector(-3,4);
-   }
-   else
-   {
-     initVel[i] = new PVector (3,4);
-   }
-   finalVel[i] = new PVector(0,0);
- }
+  size (3200,2000);
+ 
 }
 
+class Ball
+{
+  float mass;
+  float radius;
+  PVector initVel = new PVector();
+  PVector ball = new PVector();
+  PVector position = new PVector();
+  
+ Ball(float x, float y, float r)
+ {
+  position = new PVector (x,y);
+  initVel = PVector.random2D();
+  radius = r;
+  mass = radius * 0.1;
+  }
+  void update()
+  {
+    position.add(initVel);
+  }
+
+  void checkBoundaryCollision()
+  {
+  if (position.x + radius > width || position.x < radius)
+        {
+          initVel[i].x *= -1;
+        }
+        if(position.y + radius > height || position.y < radius)
+        {
+          initVel[i].y *= -1;
+        }
+        
+  }
+  void checkCollision(Ball ball)
+  {
+    if (PVector.sub(this.position, ball.position).mag() <= ball.radius + this.radius)
+    {
+      resolveCollision(ball);
+    }
+  
+  }
+
+  void resolveCollision(Ball ball)
+  {
+    float m1 = this.mass;
+    float m2 = ball.mass;
+  
+    PVector v1i = this.initVel;
+    PVector v2i = ball.initVel;
+  
+    this.initVel = (m1 - m2 / m1 + m2) * v1i + (2 * m2 * v2i) / (m1 + m2);
+    ball.initVel = PVector.mult(v2i, PVector.div((m1 + m2), PVector.sub(m2, m1)) +  PVector.div(m1 + m2,PVector.mult(2.0f, m1, v1i));
+  }
+
+}
+ Ball ball1 = new Ball(50,70,10);
+ Ball ball2 = new Ball(90, 110, 20);
+ Ball ball3 = new Ball (120, 40, 25);
+ 
+   
  
 void draw()
 {
@@ -41,60 +86,48 @@ void draw()
   
   background(0);
   
-  distance = sqrt(sq(ball[1].y - ball[0].y) + sq(ball[1].x - ball[0].x));
-  if(distance < 250)
-  {
-    
-   finalVel[1].x = (((initVel[1].x * (mass[1]-mass[0]) + (2 * mass[0] * initVel[0].x))) / (mass[1] + mass[0]));
-   finalVel[1].y = (((initVel[1].y * (mass[1]-mass[0]) + (2 * mass[0] * initVel[0].y))) / (mass[1] + mass[0]));
-   if(!notCollide)
-   {
-     finalVel[0].x = (((initVel[0].x * (mass[0]-mass[1]) + (2 * mass[1] * initVel[0].x))) / (mass[0] + mass[1]));
-     finalVel[0].y = (((initVel[0].y * (mass[0]-mass[1]) + (2 * mass[1] * initVel[0].y))) / (mass[0] + mass[1]));
-   notCollide =true;
-   }
-   else
-   {
-     finalVel[0].x = -(((initVel[0].x * (mass[0] -mass[1]) + (2 * mass[1] * initVel[0].x))) / (mass[0] + mass[1]));
-     finalVel[0].y =  (((initVel[0].y * (mass[0] -mass[1]) + (2 * mass[1] * initVel[0].y))) / (mass[0] + mass[1]));
-   }
+  
+  
+    for(int i = 0; i < ball.length; i++)
+    {
+      ball[i].update();
+      ball[i].display();
+      ball[i].checkBoundaryCollision();
+      for(int j = j+1; j< ball.length; j++)
+      {
+        ball[i].checkCollision();
+      }
+      fill(random(255),random(255),random(255));
+      ellipse(ball[i].x,ball[i].y,250,250);
+      noLoop();
+    }
+    for(int i = 0; i < 10; i++ )
+    {
+       
+        ball[i].x = ball[i].x + initVel[i].x;
+        ball[i].y = ball[i].y + initVel[i].y;
+      for(int x = 0; x < 10; x++)
+      {
+        distance = sqrt(sq(ball[x].y - ball[i].y) + (ball[x].y - ball[i].y));
+        if(distance < 250)
+        {
+          temp1 = ball[i];
+          temp2 = ball[x];
+          ball[i] = temp2;
+          ball[x] = temp1;
+        }
+      }
+      
+    }
    
    
-  initVel[0] = finalVel[0];
-  initVel[1] = finalVel[1];
-   
-   
-  }
-  fill(255,255,0);
-  ellipse(ball[0].x,ball[0].y,250,250);
   
-  fill(255,0,255);
-  ellipse(ball[1].x,ball[1].y,250,250);
   
-  if (ball[0].x + 125 > width || ball[0].x < 125)
-  {
-    initVel[0].x *= -1;
-  }
-  if(ball[0].y +125 > height || ball[0].y < 125)
-  {
-    initVel[0].y *= -1;
-  }
-  ball[0].x = ball[0].x + initVel[0].x;
-  ball[0].y = ball[0].y + initVel[0].y;
+ 
   
-  ball[1].x = ball[1].x + initVel[1].x;
-  ball[1].y = ball[1].y + initVel[1].y;
   
-  if (ball[1].x + 125 > width || ball[1].x < 125)
-  {
-    initVel[1].x *= -1;
-  }
-  if(ball[1].y +125 > height || ball[1].y < 125)
-  {
-    initVel[1].y *= -1;
-  }
   
- frameRate(500);
+ frameRate(1500);
    
   
 }
