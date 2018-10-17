@@ -32,5 +32,5 @@ void draw()
   background(0);
   fill(255,255,0);
   ellipse(player.x,player.y,radius,radius);
-  keyPressed();
+  
 }
